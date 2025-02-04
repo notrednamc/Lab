@@ -1,0 +1,90 @@
+---
+- name: Provision Domain Controller with AD, CA, and DNS
+  hosts: dc
+  gather_facts: yes
+  become: yes
+  tasks:
+
+    # Install AD DS, DNS, and CA features
+    - name: Install Active Directory Domain Services (AD DS)
+      win_feature:
+        name: AD-Domain-Services
+        state: present
+
+    - name: Install DNS Server
+      win_feature:
+        name: DNS
+        state: present
+
+    - name: Install Certificate Authority (CA)
+      win_feature:
+        name: ADCS-Cert-Authority
+        state: present
+
+    # Promote the server to a Domain Controller
+    - name: Promote to Domain Controller
+      win_shell: |
+        Import-Module ADDSDeployment
+        Install-ADDSForest -DomainName "echo.net" -DomainNetbiosName "ECHO" -InstallDNS -Force
+      become: yes
+
+    # Wait for Active Directory and DNS to finish setup
+    - name: Wait for Domain Controller to initialize
+      win_service:
+        name: "ntds"
+        state: started
+      retries: 5
+      delay: 15
+
+    # Create 10 user accounts with varying permission levels
+    - name: Create user accounts
+      win_user:
+        name: "{{ item.username }}"
+        password: "{{ item.password }}"
+        state: present
+        groups: "{{ item.groups }}"
+        description: "{{ item.description }}"
+      loop:
+        - { username: 'user1', password: 'Password123!', groups: 'Domain Users', description: 'Regular user account' }
+        - { username: 'user2', password: 'Password123!', groups: 'Domain Users', description: 'Regular user account' }
+        - { username: 'user3', password: 'Password123!', groups: 'Domain Admins', description: 'Domain admin account' }
+        - { username: 'user4', password: 'Password123!', groups: 'Domain Admins', description: 'Domain admin account' }
+        - { username: 'user5', password: 'Password123!', groups: 'Enterprise Admins', description: 'Enterprise admin account' }
+        - { username: 'user6', password: 'Password123!', groups: 'Enterprise Admins', description: 'Enterprise admin account' }
+        - { username: 'user7', password: 'Password123!', groups: 'Domain Users', description: 'Regular user account' }
+        - { username: 'user8', password: 'Password123!', groups: 'Domain Users', description: 'Regular user account' }
+        - { username: 'user9', password: 'Password123!', groups: 'Backup Operators', description: 'Backup operator account' }
+        - { username: 'user10', password: 'Password123!', groups: 'Account Operators', description: 'Account operator account' }
+
+    # Create additional AD groups if needed
+    - name: Create additional AD groups
+      win_group:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - "Domain Admins"
+        - "Enterprise Admins"
+        - "Backup Operators"
+        - "Account Operators"
+
+    # Set a password policy (optional)
+    - name: Set password policy for the domain
+      win_powershell:
+        script: |
+          $policy = Get-ADDefaultDomainPasswordPolicy
+          Set-ADDefaultDomainPasswordPolicy -MinPasswordLength 12 -MaxPasswordAge 30
+          
+    # Configure DNS settings (optional)
+    - name: Configure DNS zone
+      win_dns_zone:
+        name: "corp.local"
+        zone_type: Primary
+        state: present
+
+    # Reboot after the setup
+    - name: Reboot the server after the setup
+      win_reboot:
+        reboot_timeout: 600
+        test_command: 'whoami'
+        pre_reboot_delay: 5
+        post_reboot_delay: 20

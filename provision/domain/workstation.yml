@@ -1,0 +1,82 @@
+- name: Provision Workstation in echo.net domain
+  hosts: wkstn1, wkstn2
+  gather_facts: yes
+  become: yes  # This is typically for elevating privileges; make sure WinRM allows this
+  tasks:
+
+    # Join the workstation to the domain
+    - name: Join workstation to the echo.net domain
+      win_domain_membership:
+        domain_name: "echo.net"
+        domain_admin_user: "Administrator"
+        domain_admin_password: "DomainAdminPassword"  # Replace with the correct password
+        state: "present"
+
+    # Reboot the system to apply domain changes
+    - name: Reboot the workstation to complete domain join
+      win_reboot:
+        reboot_timeout: 600
+        test_command: 'whoami'
+        pre_reboot_delay: 5
+        post_reboot_delay: 20
+
+    # Create user accounts on the workstation (example accounts)
+    - name: Create user account on the workstation
+      win_user:
+        name: "{{ item.username }}"
+        password: "{{ item.password }}"
+        state: present
+        groups: "{{ item.groups }}"
+        description: "{{ item.description }}"
+      loop:
+        - { username: 'user1', password: 'Password123!', groups: 'Domain Users', description: 'Regular user account' }
+        - { username: 'user2', password: 'Password123!', groups: 'Domain Users', description: 'Regular user account' }
+
+    # Configure additional software installation on the workstation (GitHub tools, packages, etc.)
+    - name: Install GitHub tools on the workstation
+      win_git:
+        repo: "https://github.com/your/tool-repository.git"
+        dest: "C:/tools/your-tool"
+        clone: yes
+        update: yes
+      when: ansible_hostname == "wkstn1"  # Example: Only install on workstation1
+
+    - name: Install another tool on wkstn2
+      win_git:
+        repo: "https://github.com/another/tool-repository.git"
+        dest: "C:/tools/another-tool"
+        clone: yes
+        update: yes
+      when: ansible_hostname == "wkstn2"  # Example: Only install on workstation2
+
+    # Optional: Additional configuration tasks for the workstation (e.g., install software, configure settings)
+    - name: Install software (e.g., browser, office suite)
+      win_chocolatey:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - googlechrome
+        - vscode
+        - 7zip
+
+    # Configure Windows Firewall settings if needed
+    - name: Disable Windows Firewall for domain profile
+      win_firewall_rule:
+        name: "Allow ICMPv4-In"
+        enable: yes
+        direction: in
+        localport: all
+        remoteport: all
+        action: allow
+        protocol: ICMPv4
+        profile: domain
+        localip: all
+        remoteip: all
+
+    # Add the machine to specific organizational units or apply domain policies as needed
+    - name: Apply GPO or move the machine to an OU (optional)
+      win_group:
+        name: "Workstations"
+        members:
+          - "{{ ansible_hostname }}$"
+        state: present

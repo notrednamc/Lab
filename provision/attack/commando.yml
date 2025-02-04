@@ -1,0 +1,51 @@
+---
+# Commando
+- name: Provision Commando VM
+  hosts: commando
+  gather_facts: yes
+  become: yes  # Use sudo to escalate privileges on the Windows machine
+  tasks:
+
+    # Download the Commando VM PowerShell installation script
+    - name: Download Commando VM PowerShell script
+      win_get_url:
+        url: "https://github.com/FireEye/commando-vm/releases/download/v3.0/commando-vm-v3.0.ps1"
+        dest: "C:/temp/commando-vm.ps1"
+
+    # Run the Commando VM PowerShell installation script
+    - name: Run Commando VM PowerShell installation script
+      win_powershell:
+        script: "C:/temp/commando-vm.ps1"
+        execution_policy: ByPass
+        args:
+          - -Force  # Optional: Forces script execution without prompting
+
+    # # Placeholder for installing GitHub tools
+    # - name: Install custom tools from GitHub
+    #   win_git:
+    #     repo: "https://github.com/your/tool-repository.git"
+    #     dest: "C:/tools/your-tool"
+    #     clone: yes
+    #     update: yes
+
+    # # Another example of installing a GitHub tool
+    # - name: Install another custom tool from GitHub
+    #   win_git:
+    #     repo: "https://github.com/another/tool-repository.git"
+    #     dest: "C:/tools/another-tool"
+    #     clone: yes
+    #     update: yes
+
+    # Optional: Clean up downloaded script
+    - name: Remove Commando VM installation script
+      win_file:
+        path: "C:/temp/commando-vm.ps1"
+        state: absent
+
+    # Reboot the system after installation if required
+    - name: Reboot the system if required
+      win_reboot:
+        reboot_timeout: 600
+        test_command: 'whoami'
+        pre_reboot_delay: 5
+        post_reboot_delay: 20
