@@ -1,0 +1,34 @@
+---
+- name: Configure pfSense Firewall
+  hosts: pfsense
+  become: yes
+  tasks:
+    - name: Remove the firewall rule blocking 192.168.2.0/24
+      command: pfctl -F rules
+      register: pfctl_result
+
+    - name: Reload pfSense rules
+      command: pfctl -f /tmp/rules.debug
+
+
+
+# - name: Remove firewall rule from pfSense
+#   hosts: pfsense
+#   become: yes
+#   tasks:
+#     - name: Backup config.xml before modification
+#       copy:
+#         src: /cf/conf/config.xml
+#         dest: /cf/conf/config.xml.bak
+#         remote_src: yes
+
+#     - name: Remove the specific rule from config.xml
+#       replace:
+#         path: /cf/conf/config.xml
+#         regexp: '<rule>.*?<interface>!vtnet0</interface>.*?<network>192.168.2.0/24</network>.*?</rule>'
+#         replace: ''
+#       register: config_updated
+
+#     - name: Reload pfSense configuration if rule was changed
+#       command: /etc/rc.reload_all
+#       when: config_updated.changed

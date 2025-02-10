@@ -19,8 +19,59 @@
           - nikto
           - burpsuite
           - hydra
+<<<<<<< HEAD
         state: present
 
+=======
+          - tmux
+          - git
+          - nmap
+          - metasploit-framework
+          - python3-pip
+        state: present
+
+    - name: Clone SecLists repository
+      git:
+        repo: "https://github.com/danielmiessler/SecLists.git"
+        dest: "/opt/SecLists"
+        clone: yes
+        update: yes
+
+    - name: Install xrdp and xfce4
+      apt:
+        name:
+          - xrdp
+          - xfce4
+          - xfce4-goodies
+        state: present
+
+    - name: Enable and start xrdp service
+      systemd:
+        name: xrdp
+        enabled: yes
+        state: started
+
+    - name: Allow xrdp in UFW (if firewall is used)
+      ufw:
+        rule: allow
+        port: "3389"
+        proto: tcp
+      ignore_errors: yes  # Ignore if UFW is not installed
+
+    - name: Set XFCE4 as default session for RDP
+      copy:
+        dest: /home/vagrant/.xsession
+        content: "xfce4-session"
+        owner: vagrant
+        group: vagrant
+        mode: '0644'
+
+    - name: Restart xrdp service
+      systemd:
+        name: xrdp
+        state: restarted
+
+>>>>>>> dc25729 (Vagrantfile and initial provisioning ansible.)
     # # Placeholder: Install GitHub tools (add specific tools)
     # - name: Install tools from GitHub
     #   git:
@@ -42,7 +93,14 @@
     #     remote_src: yes
 
     # Install additional tools via apt or any other package manager
+<<<<<<< HEAD
     - name: Install additional tools (example)
       apt:
         name: "your-package-name"
         state: present
+=======
+    # - name: Install additional tools (example)
+    #   apt:
+    #     name: "your-package-name"
+    #     state: present
+>>>>>>> dc25729 (Vagrantfile and initial provisioning ansible.)
