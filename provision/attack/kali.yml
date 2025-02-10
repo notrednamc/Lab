@@ -19,10 +19,6 @@
           - nikto
           - burpsuite
           - hydra
-<<<<<<< HEAD
-        state: present
-
-=======
           - tmux
           - git
           - nmap
@@ -70,37 +66,3 @@
       systemd:
         name: xrdp
         state: restarted
-
->>>>>>> dc25729 (Vagrantfile and initial provisioning ansible.)
-    # # Placeholder: Install GitHub tools (add specific tools)
-    # - name: Install tools from GitHub
-    #   git:
-    #     repo: "https://github.com/your/tool-repository.git"
-    #     dest: "/home/kali/Desktop/tools/your-tool"
-    #     clone: yes
-    #     update: yes
-
-    # # Placeholder: Example of installing a tool using a release tarball
-    # - name: Download and install custom tool
-    #   get_url:
-    #     url: "https://github.com/your/custom-tool/releases/download/v1.0/tool.tar.gz"
-    #     dest: "/home/kali/Desktop/tools/tool.tar.gz"
-
-    # - name: Extract the tool
-    #   unarchive:
-    #     src: "/tmp/tool.tar.gz"
-    #     dest: "/home/kali/Desktop/tools/"
-    #     remote_src: yes
-
-    # Install additional tools via apt or any other package manager
-<<<<<<< HEAD
-    - name: Install additional tools (example)
-      apt:
-        name: "your-package-name"
-        state: present
-=======
-    # - name: Install additional tools (example)
-    #   apt:
-    #     name: "your-package-name"
-    #     state: present
->>>>>>> dc25729 (Vagrantfile and initial provisioning ansible.)
