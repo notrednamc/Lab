@@ -1,0 +1,5 @@
+## Ignore the pfsense box, it is too large
+*.box
+
+## Ignore the vagrant directory
+.vagrant/

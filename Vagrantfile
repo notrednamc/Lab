@@ -9,7 +9,7 @@ end
 Vagrant.configure("2") do |config|
   config.vm.define "pfsense" do |pfsense|
     # pfsense.vm.guest = :freebsd
-    pfsense.vm.box = "EchoLab-pfSense.box"
+    pfsense.vm.box = "boxes/EchoLab-pfSense.box"
     # Use the none communicator. Vagrant will not be able to 
     # communicate with the guest
     pfsense.vm.communicator = "none"
@@ -51,7 +51,6 @@ Vagrant.configure("2") do |config|
 
     # Disable default Vagrant SSH communication (optional)
     # kali.vm.communicator = "none"
-    # kali.ssh.host = "10.10.10.12"
 
     # Disable NAT
     kali.vm.provider "virtualbox" do |vb|
@@ -72,28 +71,31 @@ Vagrant.configure("2") do |config|
     # SHELL
   end
 
-  # Windows Server Domain Controller
-  config.vm.define "dc" do |dc|
-    dc.vm.box = "gusztavvargadr/windows-server-2022" # Use a Windows Server 2022 box
+  # # Windows Server Domain Controller
+  # config.vm.define "dc" do |dc|
+  #   # dc.vm.box = "gusztavvargadr/windows-server" # Use a Windows Server 2022 box
+  #   # dc.vm.box_version = "2102.0.2409"
+  #   dc.vm.box = "boxes/windows-server-2022.box" # Local copy
 
-    # Disable default Vagrant SSH communication (optional)
-    # kali.vm.communicator = "none"
+  #   # Disable default Vagrant SSH communication (optional)
+  #   # kali.vm.communicator = "none"
 
-    dc.vm.hostname = "lab-dc"
-    dc.vm.network "private_network", type: "dhcp", ip: "192.168.56.10", virtualbox__intnet: "lab_lan"
+  #   dc.vm.hostname = "lab-dc"
+  #   dc.vm.network "private_network", type: "dhcp", ip: "192.168.56.10", virtualbox__intnet: "lab_lan"
 
-    dc.vm.provider "virtualbox" do |vb|
-      vb.memory = "4096"
-      vb.cpus = 2
-    end
+  #   dc.vm.provider "virtualbox" do |vb|
+  #     vb.memory = "4096"
+  #     vb.cpus = 2
+  #     vb.customize ["modifyvm",:id, "--macaddress1", "auto"]
+  #   end
 
-    # Auto-install Active Directory Domain Services (AD DS)
-    dc.vm.provision "shell", inline: <<-SHELL
-      Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools
-      Install-WindowsFeature -Name DNS -IncludeManagementTools
-      Install-WindowsFeature -Name DHCP -IncludeManagementTools
-      Install-WindowsFeature -Name RSAT-AD-AdminCenter -IncludeManagementTools
-      Write-Host "Active Directory and DNS installed. Reboot required!"
-    SHELL
-  end
+  #   # Auto-install Active Directory Domain Services (AD DS)
+  #   dc.vm.provision "shell", inline: <<-SHELL
+  #     Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools
+  #     Install-WindowsFeature -Name DNS -IncludeManagementTools
+  #     Install-WindowsFeature -Name DHCP -IncludeManagementTools
+  #     Install-WindowsFeature -Name RSAT-AD-AdminCenter -IncludeManagementTools
+  #     Write-Host "Active Directory and DNS installed. Reboot required!"
+  #   SHELL
+  # end
 end
